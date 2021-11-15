@@ -27,21 +27,21 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
     def create_embed(self, ctx, role, game_info):
         """ Tworzenie wiadomości typu embed """
         embed = discord.Embed(
-            color=game_info['kolor']
+            color=game_info['kolor'],
+            title=f"***`{role.name}`***"
         )
         grole_id = game_info['guard_role_id']
         grole = ctx.guild.get_role(game_info['guard_role_id'])
         guards = [grole.mention]
 
-        for member in self.bot.get_all_members():
+        '''for member in self.bot.get_all_members():
             if grole_id in [x.id for x in member.roles]:
-                guards.add(member.mention)
+                guards.append(member.mention)'''
 
         # guards = [self.bot.get_user(x).mention for x in game_info['guard_role_id']]
         guards = ", ".join(guards)
         guards = "Aktualnie brak" if guards == "" else guards
 
-        embed.set_author(name=f"***`{role}`***")
         embed.add_field(name="Opis", value=game_info['opis'], inline=False)
         embed.add_field(name="Odpowiedzialni", value=guards, inline=False)
         embed.add_field(name="Regulamin", value=game_info['rules'], inline=False)
@@ -95,6 +95,7 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
             guild = ctx.guild
 
             perm_n = discord.PermissionOverwrite()
+            perm_n.read_message_history = True
             perm_n.send_messages = False
             perm_n.read_messages = False
 
@@ -139,7 +140,7 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
                 "general": ["txt", perm_rw, perm_r],
                 "👀spectators": ["txt", perm_rw, perm_rw],
 
-                "🔧organizacyjne": ["v", perm_n, perm_n],
+                "🔧 organizacyjne": ["v", perm_n, perm_n],
                 "👀 spectators": ["v", perm_rw, perm_rw],
             }
 
@@ -183,12 +184,25 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
     @game.group(invoke_without_command = True)
     async def update(self, ctx):
         """Aktualizowanie informacji o danej grze"""
-        channel_id = GuildParams(ctx.guild.id).role_channel_id
-        channel = ctx.guild.get_channel(channel_id)
-        messages = await channel.history().flatten()
-        for msg in messages:
-            await msg.add_reaction("🖐🏼")
-            await ctx.send(msg)
+        async with ctx.typing():
+            channel_id = GuildParams(ctx.guild.id).role_channel_id
+            channel = ctx.guild.get_channel(channel_id)
+            messages = await channel.history().flatten()
+            for msg in messages:
+                await msg.add_reaction("🖐🏼")
+                #await ctx.send(msg)
+            
+            data = _json(self.file_path).read()
+            info = data[str(ctx.guild.id)]
+            for id in info:
+                print(id, info[id])
+                role = ctx.guild.get_role(int(id))
+                emb = self.create_embed(ctx, role, info[id])
+                channel = self.bot.get_channel(GuildParams(ctx.guild.id).role_channel_id)
+                msg = await channel.fetch_message(info[id]['msg_id'])
+                await msg.edit(embed=emb)
+        
+        await ctx.send("Powinno być git")
 
     @update.command(usage="<role> <color>")
     async def color(self, ctx, role: discord.Role, value: str):
