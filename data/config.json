@@ -1,0 +1,27 @@
+{
+    "version": "1.7.2",
+    "description": "Bot nadzorujący i zarządzający serwerem WiśniowaCup 2.0",
+    "prefix": "!",
+    "owners_id": 509803823364308992,
+    "status": "Prace wciąż trwają...",
+    "path_to_cogs": "./cogs",
+    "guilds": {
+        "810632458428088371": {
+            "role_channel_id": 906341532305592330
+        },
+        "906355732553797663": {
+            "role_channel_id": 908048922008780810,
+            "role_confirm_channel_id": 908124276396261407,
+            "moderation_channel_id": 909422859372363807
+        },
+        "900081748669521950": {
+            "role_channel_id": 908080043119497216,
+            "role_confirm_channel_id": 908124219592814613,
+            "moderation_channel_id": 909519661387874344
+        },
+        "692474615670505472": {
+            "role_channel_id": 909206655391109160,
+            "role_confirm_channel": 909206653658857482
+        }
+    }
+}
