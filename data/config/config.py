@@ -36,6 +36,7 @@ def return_cogs():
 
 # podstawowe parametry bota
 # TOKEN = settings['token']
+normal_work = True
 version = settings['version']
 commands_prefix = settings['prefix']
 description = settings['description']
