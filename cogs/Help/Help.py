@@ -64,9 +64,10 @@ class Help(commands.Cog):
         if not input:
             # checks if owner is on this server - used to 'tag' owner
             try:
-                owner = await self.bot.fetch_user(owner).name
+                owner = await self.bot.fetch_user(owner)
+                owner = owner.name
             except Exception as e:
-                print("Got error in help:\n\t", e.args, e)
+                print("Got error in help:\n\t", e)
                 owner = owner_name
 
             # starting to build embed
@@ -80,6 +81,7 @@ class Help(commands.Cog):
                 for command in self.bot.get_cog(cog).get_commands():
                     cogs_desc += f'`{prefix}{command.name} {give_usage(command)}` -> {command.help}\n'
                 cogs_desc = self.bot.get_cog(cog).description if cogs_desc == "" else cogs_desc
+                cogs_desc = "*brak opisu*" if cogs_desc == "" else cogs_desc
                 emb.add_field(name=cog, value=cogs_desc, inline=False)
 
             # integrating trough uncategorized commands
@@ -164,7 +166,10 @@ class Help(commands.Cog):
                                 '''
 
         # sending reply embed using our own function defined above
-        await ctx.send(embed=emb)
+        try:
+            await ctx.send(embed=emb)
+        except:
+            print(emb.to_dict())
 
 
 def setup(bot):
