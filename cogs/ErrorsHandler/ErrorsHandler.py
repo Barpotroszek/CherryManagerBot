@@ -3,15 +3,17 @@ import sys
 import discord
 from discord.ext import commands
 from discord.ext.commands import errors
-from data.config.config import _json
+from discord.ext.commands.core import Command
+from data.config.config import _json, cache
 from data.config import config
 import logging as log
+import difflib
 
 
 class ErrorsHandler(commands.Cog):
     def __init__(self, bot, logger: log) -> None:
         self.bot = bot
-        self.ignored_errors = [errors.CommandNotFound]
+        self.ignored_errors = []
         self.logger = logger
         self.logger.basicConfig(
             filename=f"cogs/ErrorsHandler/logs/{datetime.now().strftime('%d-%m-%Y %H-%M')}.log",
@@ -22,6 +24,7 @@ class ErrorsHandler(commands.Cog):
             format=
             """"\n\n\n%(name)s" [%(asctime)s] -> %(message)s"""
         )
+        self.commands = [cmd.name for cmd in self.bot.walk_commands()]
         self.vars_file = "cogs/ErrorsHandler/vars.json"
 
     async def reply(self, msg):
@@ -35,7 +38,16 @@ class ErrorsHandler(commands.Cog):
             return
         
         self.ctx = ctx
-        if isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, errors.CommandNotFound):
+            cmd = ctx.message.content[1:].split(" ")[0]
+            cache["not_found_error"] = cmd
+            print("Content: ", cmd)
+            print(error)
+            matches = difflib.get_close_matches(cmd, self.commands)
+            if matches != []:
+                await ctx.send("Chodziło ci o: `{}`?".format(", ".join(matches)))
+                
+        elif isinstance(error, commands.MissingRequiredArgument):
             await self.reply("Nie podano wymaganego argumentu: `{}`".format(error.param))
 
         elif isinstance(error, errors.BadArgument):
@@ -79,7 +91,7 @@ class ErrorsHandler(commands.Cog):
             error = getattr(error, 'original', error)
             original = getattr(error, 'original', error)
 
-            print([original])
+            #print([original])
             if hasattr(error, "params"):
                 params = error.params
             else:
