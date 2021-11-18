@@ -39,6 +39,7 @@ class ErrorsHandler(commands.Cog):
         
         self.ctx = ctx
         if isinstance(error, errors.CommandNotFound):
+            '''Dopasowywanie komend'''
             cmd = ctx.message.content[1:].split(" ")[0]
             cache["not_found_error"] = cmd
             print("Content: ", cmd)
@@ -46,7 +47,7 @@ class ErrorsHandler(commands.Cog):
             matches = difflib.get_close_matches(cmd, self.commands)
             if matches != []:
                 await ctx.send("Chodziło ci o: `{}`?".format(", ".join(matches)))
-                
+
         elif isinstance(error, commands.MissingRequiredArgument):
             await self.reply("Nie podano wymaganego argumentu: `{}`".format(error.param))
 
