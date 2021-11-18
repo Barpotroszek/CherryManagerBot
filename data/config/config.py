@@ -50,8 +50,9 @@ default_channels = {
     "moderacja": "moderation_channel_id"
 }
 
-cache = {}
-cache['messages'] = {}
+cache = {
+    "messages": [],
+}
 
 
 class GuildParams:
