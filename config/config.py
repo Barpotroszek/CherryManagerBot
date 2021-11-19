@@ -12,7 +12,7 @@ def return_cogs():
     for (path, dirs, files) in walk(COGS_DIR_PATH):
         for file in files:
             if file.endswith(".py"):
-                path_to_file = join(path, file.removesuffix(".py"))
+                path_to_file = join(path, file[:-3])
                 table = path_to_file.maketrans("\\", ".")
                 __cogs__.append(path_to_file.translate(table))
     print(__cogs__)
