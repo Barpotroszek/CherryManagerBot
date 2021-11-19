@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from discord.errors import Forbidden
-from data.config import config
+from config import config
 
 """This custom help command is a perfect replacement for the default one on any Discord Bot written in Discord.py!
 However, you must put "bot.remove_command('help')" in your bot, and the command must be in a cog for it to work.
@@ -55,7 +55,7 @@ class Help(commands.Cog):
         version =  config.version # enter version of your code
 
         # setting owner name - if you don't wanna be mentioned remove line 49-60 and adjust help text (line 88)
-        owner = config.owners_id	# ENTER YOU DISCORD-ID
+        owner = config.owners_id[0]	# ENTER YOU DISCORD-ID
         owner_name = "Barpotroszek#1584"	# ENTER YOUR USERNAME#1234
 
 

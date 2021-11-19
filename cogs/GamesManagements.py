@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 from discord.ext.commands.context import Context
-from data.config.config import GuildParams, _json
+from config.core import GuildParams, _json
 
 
 class GamesManagement(commands.Cog, name="GamesManagement", ):

@@ -1,0 +1,17 @@
+{
+    "version": "1.7.5",
+    "description": "Bot nadzorujący i zarządzający serwerem WiśniowaCup 2.0",
+    "prefix": "!",
+    "owners_id": [
+        509803823364308992
+    ],
+    "status": [
+        "Trener motywacyjny",
+        "Muzyka motywacyjna",
+        "Nie poddam sieeę!",
+        "Jak być pięknym i gładkim?",
+        "jak babcie w oknie",
+        "jak zgaszonego radia",
+        "ploteczki mamusi"
+    ]
+}

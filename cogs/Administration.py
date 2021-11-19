@@ -1,9 +1,11 @@
 import discord
-from discord.ext.commands import converter
-from data.config import config
-from discord.permissions import Permissions
-from data.config.config import GuildParams, cache
+import subprocess as sub
+from config import config
+from config.config import cache
 from discord.ext import commands
+from config.core import GuildParams
+from discord.ext.commands import converter
+from discord.permissions import Permissions
 
 class Administration(commands.Cog):
     """Dane statystyczne, itp."""
@@ -70,7 +72,7 @@ class Administration(commands.Cog):
                 else:
                     await ctx.send(f"Yo yo, jest kanał `{channel}`")
                     channel = await converter.TextChannelConverter().convert(ctx, channel)
-                channel.set_permissions(target=everyone, read_messages=True, send_messages=False)
+                await channel.set_permissions(target=everyone, read_messages=True, send_messages=False)
                 created_channels[channel.name] = channel
 
             # poszukiwanie roli spectatora
@@ -94,7 +96,16 @@ class Administration(commands.Cog):
         text = ",".join([f"`{ch}`" for ch in config.default_channels])
         await ctx.send(f"Made first setup\n **Pamiętaj, by zmienić uprawnienia dla kanałów: {text} !!!!!**")    
 
-    
+    @commands.command(name="git", usage="<option>", help="Sterowanie gitem")
+    async def git(self, ctx, *args):    
+        if ctx.author.id not in config.owners_id:
+            await ctx.reply("Tylko właściciel bota może użyć tej komendy")
+            return
+        if args == ():
+            args = ("status",)
+        cmd = ['git']+[a for a in args]
+        proc = sub.run(cmd, shell=True, text=True, capture_output=True)
+        await ctx.send(f"```sh\n{proc.stdout}```")
 
 
 '''

@@ -1,13 +1,12 @@
-from datetime import datetime
 import sys
 import discord
+import difflib
+import logging as log
+from datetime import datetime
 from discord.ext import commands
 from discord.ext.commands import errors
-from discord.ext.commands.core import Command
-from data.config.config import _json, cache
-from data.config import config
-import logging as log
-import difflib
+from config.core import _json, LOGS_DIR_PATH
+from config.config import cache
 
 
 class ErrorsHandler(commands.Cog):
@@ -16,7 +15,7 @@ class ErrorsHandler(commands.Cog):
         self.ignored_errors = []
         self.logger = logger
         self.logger.basicConfig(
-            filename=f"cogs/ErrorsHandler/logs/{datetime.now().strftime('%d-%m-%Y %H-%M')}.log",
+            filename=f"{LOGS_DIR_PATH}/{datetime.now().strftime('%d-%m-%Y %H-%M')}.log",
             filemode="a",
             level=log.ERROR,
             encoding="utf-8",
@@ -25,7 +24,7 @@ class ErrorsHandler(commands.Cog):
             """"\n\n\n%(name)s" [%(asctime)s] -> %(message)s"""
         )
         self.commands = [cmd.name for cmd in self.bot.walk_commands()]
-        self.vars_file = "cogs/ErrorsHandler/vars.json"
+        self.vars_file = "vars.json"
 
     async def reply(self, msg):
         '''Wysyłanie odpowiedzi na wysłaną komendę'''
@@ -90,7 +89,6 @@ class ErrorsHandler(commands.Cog):
 
         else:
             error = getattr(error, 'original', error)
-            original = getattr(error, 'original', error)
 
             #print([original])
             if hasattr(error, "params"):

@@ -1,7 +1,8 @@
 import discord
 from discord import Embed
 from discord.ext import commands
-from data.config.config import cache, GuildParams
+from config.config import cache
+from config.core import GuildParams
 
 
 class RoleOnReaction:

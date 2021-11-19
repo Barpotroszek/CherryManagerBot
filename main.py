@@ -1,8 +1,11 @@
+import asyncio
 from os import system, getenv
 import discord
+from itertools import cycle
 from discord.ext import commands
 from discord.ext.commands.errors import NoEntryPointError
-from data.config import config
+from config.core import startup
+from config import config
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -27,18 +30,23 @@ async def on_connect():
             bot.load_extension(cog)
         except NoEntryPointError:
             print(f"Nie udało się załadować roszczerzenia {cog}")
+        except ModuleNotFoundError:
+            print(cog)
     print("Dane wczytane")
 
 
 @bot.event
 async def on_ready():
     print("\nZalogowano jako:", bot.user)
-    status = discord.Game(config.status)
-    await bot.change_presence(status=discord.Status.do_not_disturb, activity=status)
     print("----------------------------------")
+    await startup(bot)
+    status = cycle(config.activities)
+    while not bot.is_closed():
+        activity = next(status)
+        await bot.change_presence(status=discord.Status.do_not_disturb, activity=activity)
+        await asyncio.sleep(15.0)
 
 @bot.command()
-
 async def admin(ctx):
     """Mówi, czy dany użytkownik ma rolę \"Administrator\""""
     await ctx.send("Yes, you're admin")
@@ -64,11 +72,14 @@ async def reload(ctx):
                     inline=False
                 )
             except Exception:
-                embed.add_field(
-                    name=cog,
-                    value="Something gone wrong",
-                    inline=False
-                )
+                try:
+                    bot.add_cog(cog)
+                except Exception:
+                    embed.add_field(
+                        name=cog,
+                        value="Something gone wrong",
+                        inline=False
+                    )  
     
     msg = await ctx.send(embed=embed)
     await ctx.message.delete(delay=5)

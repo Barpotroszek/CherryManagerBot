@@ -1,7 +1,7 @@
 import os
 from os.path import join
 from discord.file import File
-from data.config import config
+from config import config
 from discord.ext import commands
 from discord.embeds import Embed
 from asyncio.exceptions import TimeoutError
@@ -14,7 +14,7 @@ class FileSending(commands.Cog):
     @commands.command(name="send", usage="<file_index>", help="Zwraca podany plik")
     async def send_file(self, ctx, number: int = None):
         '''Zwraca plik, którego index został podany. Jeśli nie podano indeksu, zwraca ich liste i czeka na liczbę'''
-        if ctx.author.id != config.owners_id:
+        if ctx.author.id not in config.owners_id:
             await ctx.reply("Tylko właściciel bota może użyć tej komendy")
             return
 
