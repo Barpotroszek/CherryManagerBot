@@ -1,9 +1,6 @@
 from os import walk
 from os.path import join
 import discord
-from discord.enums import ActivityType
-
-from discord.partial_emoji import PartialEmoji
 from config.core import _json, CONFIG_FILE_PATH, COGS_DIR_PATH
 from discord import activity
 
@@ -13,7 +10,9 @@ def return_cogs():
         for file in files:
             if file.endswith(".py"):
                 path_to_file = join(path, file[:-3])
-                table = path_to_file.maketrans("\\", ".")
+                table = path_to_file.maketrans("\\", ".") # for Windows
+                if table == None: 
+                    table = path_to_file.maketrans("/", ".") # for Linux
                 __cogs__.append(path_to_file.translate(table))
     print(__cogs__)
     return __cogs__
