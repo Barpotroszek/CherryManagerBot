@@ -44,12 +44,12 @@ async def startup(bot):
         path = f"{SERVERS_SETTINGS_FILES}/{guild.id}.json"  # creating path
         data={}
 
-        # if there's a file, then set mode for reading, else -> append file
-        if not isfile(path):
-            f = open(path, "a+", encoding="utf-8")
-        else:
-            f = open(path, "r+", encoding="utf-8")
+        # if there's a file, then continue
+        if isfile(path):
+            continue
 
+        #if there's no file, then create it and make: 
+        f = open(path, "a+", encoding="utf-8")
         print("Guild: ", guild.name)
         data["name"] = guild.name
         data['role_channel_id'] = None
@@ -63,6 +63,7 @@ class GuildParams:
     def __init__(self, id: int):
         self.id = id
         self.settings_filename=f'{SERVERS_SETTINGS_FILES}/{self.id}.json'
+        print("File:", self.settings_filename)
         
         guild_config = _json(self.settings_filename).read()
         
