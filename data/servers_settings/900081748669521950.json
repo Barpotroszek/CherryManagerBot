@@ -1,6 +1,6 @@
 {
-  "name": "WiśniowaCup 2.0",
-  "role_channel_id": null,
-  "role_confirm_channel_id": null,
-  "moderation_channel_id": null
+    "name": "WiśniowaCup 2.0",
+    "role_channel_id": 908080043119497216,
+    "role_confirm_channel_id": 908124219592814613,
+    "moderation_channel_id": 909519661387874344
 }
