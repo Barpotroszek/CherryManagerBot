@@ -11,14 +11,14 @@ def return_cogs():
             if file.endswith(".py"):
                 path_to_file = join(path, file[:-3])
                 table = path_to_file.maketrans("\\", ".") # for Windows
-                if table == None: 
-                    table = path_to_file.maketrans("/", ".") # for Linux
+                path_to_file = path_to_file.translate(table)
+                table = path_to_file.maketrans("/", ".") # for Linux
                 __cogs__.append(path_to_file.translate(table))
     print(__cogs__)
     return __cogs__
 
 
-# podstawowe parametry bota
+# parametry bota
 settings = _json(CONFIG_FILE_PATH).read()
 normal_work = True
 version = settings['version']

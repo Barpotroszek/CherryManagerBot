@@ -2,18 +2,6 @@ import json
 from os import makedirs
 from os.path import isfile
 
-# stałe zmienne dla bota
-CONFIG_FILE_PATH = "./config/config.json"
-COGS_DIR_PATH = "cogs"
-DATA_DIR_PATH = "data"
-LOGS_DIR_PATH = f"{DATA_DIR_PATH}/logs"
-SERVERS_SETTINGS_FILES = "data/servers_settings"
-default_channels = {
-    "role": "role_channel_id",
-    "zatwierdzanie-ról": "role_confirm_channel_id",
-    "moderacja": "moderation_channel_id"
-}
-
 class _json():
     def __init__(self, path) -> None:
         self.path = path
@@ -32,6 +20,22 @@ class _json():
         with open(self.path, "w",  encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
             f.close()
+
+# stałe zmienne dla bota
+SECRETS_FILE_PATH = "./config/SECRETS.json"
+CONFIG_FILE_PATH = "./config/config.json"
+COGS_DIR_PATH = "cogs"
+DATA_DIR_PATH = "data"
+LOGS_DIR_PATH = f"{DATA_DIR_PATH}/logs"
+SERVERS_SETTINGS_FILES = "data/servers_settings"
+TOKEN_M = _json(SECRETS_FILE_PATH).read()["MAIN"]
+TOKEN_T = _json(SECRETS_FILE_PATH).read()["TEST"]
+default_channels = {
+    "role": "role_channel_id",
+    "zatwierdzanie-ról": "role_confirm_channel_id",
+    "moderacja": "moderation_channel_id"
+}
+
 
 async def startup(bot):
     '''Uruchamianie "systemu", tworzenie potrzebnych folderów i plików'''
