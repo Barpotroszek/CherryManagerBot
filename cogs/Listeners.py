@@ -19,11 +19,11 @@ class RoleOnReaction:
         role_embd = message.embeds[0].to_dict()
 
         # przyznawanie roli użytkownikom
-        '''role_id = int(role_embd["footer"]['text'])'''
+        role_id = int(role_embd["footer"]['text'])
         # await role_confirm_channel.send(role_embd)   -> aktualnie niepotrzebne
 
         ''' TYMCZASOWE ROZWIĄZANIE -> na przyjmowanie organizatorów'''
-        role_id = int(role_embd["fields"][1]["value"][3:-1])
+        # role_id = int(role_embd["fields"][1]["value"][3:-1])
 
         emb = Embed(
             title=f"Prośba użytkownika `{user.name}` o zatwierdzenie roli",
@@ -197,7 +197,6 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
 
         ''' ZARZĄDZANIE ROLAMI '''
         if payload.emoji.name in self.role_emojis:
-            print("HERE BOY")
             # gdy reakcja została dodana na kanale "role"
             if GuildParams(guild.id).role_channel_id == message.channel.id and payload.emoji.name == self.emoji_raised_hand:
                 print("I'm here")
