@@ -1,14 +1,11 @@
 import asyncio
-from os import system, getenv
+from os import system
 import discord
 from itertools import cycle
 from discord.ext import commands
 from discord.ext.commands.errors import NoEntryPointError
-from config.core import startup
+from config.core import startup, TOKEN_T, TOKEN_M
 from config import config
-from dotenv import load_dotenv
-load_dotenv()
-
 
 bot = commands.Bot(
     config.commands_prefix,
@@ -108,6 +105,6 @@ async def on_error(event_error, *args, **kwargs):
     await channel.send("***Wleciał error***", embed=embed)
 '''
 if config.normal_work:
-    bot.run(getenv("MAIN"))
+    bot.run(TOKEN_M)
 else:
-    bot.run(getenv("TEST"))
+    bot.run(TOKEN_T)

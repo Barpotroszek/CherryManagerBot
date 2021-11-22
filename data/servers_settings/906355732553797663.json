@@ -1,6 +1,6 @@
 {
-  "name": "Serwer użytkownika Barpotroszek",
-  "role_channel_id": null,
-  "role_confirm_channel_id": null,
-  "moderation_channel_id": null
+    "name": "Serwer użytkownika Barpotroszek",
+    "role_channel_id": 908048922008780810,
+    "role_confirm_channel_id": 908124276396261407,
+    "moderation_channel_id": 909422859372363807
 }

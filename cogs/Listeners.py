@@ -1,9 +1,8 @@
 import discord
 from discord import Embed
 from discord.ext import commands
-from config.config import cache
 from config.core import GuildParams
-
+from config.config import cache, default_channels
 
 class RoleOnReaction:
     async def ask_for_role(self, payload):
@@ -193,13 +192,22 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
 
         message = await guild.get_channel(payload.channel_id).fetch_message(payload.message_id)
         print(message)
+        g_params = GuildParams(guild.id)
         print(payload.emoji.name)
+        params = [a for _, a in default_channels.items()]
+        print("Params:", params)
+
+        # sprawdza, czy wszystkie wartości dla danego serwera są zdefiniowane
+        # jeśli nie, wysyła prywatną wiadomość do właściciela danego serwera
+        if any(getattr(g_params, attr) == None for attr in params):
+            print("No, mordo, to nie wyjdzie :D")
+            user = await self.bot.fetch_user(guild.owner_id)
+            await user.send(f"Mordeczko. Użyj komendy `!beginning` na serwerze ***{guild.name}***, bo nie mogę nadać żadnej roli :/")
 
         ''' ZARZĄDZANIE ROLAMI '''
         if payload.emoji.name in self.role_emojis:
             # gdy reakcja została dodana na kanale "role"
             if GuildParams(guild.id).role_channel_id == message.channel.id and payload.emoji.name == self.emoji_raised_hand:
-                print("I'm here")
                 msg = await self.ask_for_role(payload)
                 await msg.add_reaction(self.emoji_t)
                 await msg.add_reaction(self.emoji_n)
@@ -215,10 +223,7 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
         if GuildParams(payload.guild_id).moderation_channel_id == payload.channel_id:
             print("MODERACJA")
             if payload.emoji.name == self.emoji_warning:
-                await self.send_warning(payload)
-
-
-                
+                await self.send_warning(payload)                
 
     @commands.Cog.listener()
     async def on_typing(self, channel, user, when):

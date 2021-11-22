@@ -1,9 +1,6 @@
 from os import walk
 from os.path import join
 import discord
-from discord.enums import ActivityType
-
-from discord.partial_emoji import PartialEmoji
 from config.core import _json, CONFIG_FILE_PATH, COGS_DIR_PATH
 from discord import activity
 
@@ -12,14 +9,16 @@ def return_cogs():
     for (path, dirs, files) in walk(COGS_DIR_PATH):
         for file in files:
             if file.endswith(".py"):
-                path_to_file = join(path, file.removesuffix(".py"))
-                table = path_to_file.maketrans("\\", ".")
+                path_to_file = join(path, file[:-3])
+                table = path_to_file.maketrans("\\", ".") # for Windows
+                path_to_file = path_to_file.translate(table)
+                table = path_to_file.maketrans("/", ".") # for Linux
                 __cogs__.append(path_to_file.translate(table))
     print(__cogs__)
     return __cogs__
 
 
-# podstawowe parametry bota
+# parametry bota
 settings = _json(CONFIG_FILE_PATH).read()
 normal_work = True
 version = settings['version']
