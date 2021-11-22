@@ -1,4 +1,4 @@
-import json
+import json_files as json
 from os import makedirs
 from os.path import isfile
 
