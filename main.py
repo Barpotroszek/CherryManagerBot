@@ -27,8 +27,9 @@ async def on_connect():
             bot.load_extension(cog)
         except NoEntryPointError:
             print(f"Nie udało się załadować roszczerzenia {cog}")
-        except ModuleNotFoundError:
-            print(cog)
+        except Exception:
+            print(f"{cog} -> {Exception}")
+            pass 
     print("Dane wczytane")
 
 
