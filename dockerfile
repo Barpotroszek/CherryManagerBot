@@ -1,6 +1,7 @@
-FROM debian:bullseye
-
-RUN apt update && apt install -y build-essential gcc clang clang-tools cmake python3 cppcheck valgrind afl gcc-multilib && rm -rf /var/lib/apt/lists/*
+FROM python:3.8.0-slim
+RUN apt-get update \
+&& apt-get install gcc -y \
+&& apt-get clean
 
 WORKDIR /CherryManagerBot
 COPY . . 
