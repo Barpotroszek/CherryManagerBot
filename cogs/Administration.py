@@ -105,6 +105,8 @@ class Administration(commands.Cog):
             args = ("status",)
         cmd = ['git']+[a for a in args]
         proc = sub.run(cmd, shell=True, text=True, capture_output=True)
+        await ctx.send(type(proc.stdout), len(proc.stdout))
+        print("\n\nOUTPUT:\n", proc.stdout) 
         await ctx.send(f"```sh\n{proc.stdout}```")
 
 
