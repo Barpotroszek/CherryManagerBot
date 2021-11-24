@@ -18,7 +18,7 @@ class ErrorsHandler(commands.Cog):
             filename=f"{LOGS_DIR_PATH}/{datetime.now().strftime('%d-%m-%Y %H-%M')}.log",
             filemode="a",
             level=log.ERROR,
-            encoding="utf-8",
+            # encoding="utf-8",
             datefmt="%H:%m %m/%d/%Y",
             format=
             """"\n\n\n%(name)s" [%(asctime)s] -> %(message)s"""
