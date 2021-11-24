@@ -28,8 +28,8 @@ async def on_connect():
             bot.load_extension(cog)
         except NoEntryPointError:
             print(f"Nie udało się załadować roszczerzenia {cog}")
-        except Exception:
-            print(f"{cog} -> {Exception}")
+        except Exception as e:
+            print(f"{cog} -> {e}")
             pass 
     print("Dane wczytane")
 
