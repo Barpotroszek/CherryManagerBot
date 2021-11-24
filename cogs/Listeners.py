@@ -232,6 +232,13 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
             print("Użytkownik dodany do listy")
             await user.send("Pamiętaj, że jestem tylko botem. Prawdopodobnie ta wiadomość zostanie przekazana do admistracji :innocent:")
 
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        print(f"{member} dołączył do {member.guild}")
+        await member.send(f"Cześć! Witamy na serwerze `{member.guild}`")
+        spectator_role_id = GuildParams(member.guild.id).spectator_role_id
+        spectator_role = member.guild.get_role(spectator_role_id)
+        await member.add_roles(spectator_role)
 
 def setup(bot):
     bot.add_cog(Listeners(bot))

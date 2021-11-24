@@ -92,7 +92,7 @@ class Administration(commands.Cog):
                 await ctx.send("Dodano role *👀spectator*")
 
 
-            GuildParams(guild.id).add_new(created_channels)
+            GuildParams(guild.id).add_new(created_channels, r_spectator.id)
         text = ",".join([f"`{ch}`" for ch in config.default_channels])
         await ctx.send(f"Made first setup\n **Pamiętaj, by zmienić uprawnienia dla kanałów: {text} !!!!!**")    
 

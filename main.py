@@ -9,7 +9,8 @@ from config import config
 
 bot = commands.Bot(
     config.commands_prefix,
-    help_command=None
+    help_command=None,
+    intents=discord.Intents.all()
 )
 
 # funkcja testowa
