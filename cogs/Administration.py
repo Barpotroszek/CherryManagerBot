@@ -101,10 +101,11 @@ class Administration(commands.Cog):
         if ctx.author.id not in config.owners_id:
             await ctx.reply("Tylko właściciel bota może użyć tej komendy")
             return
-        if args == ():
-            args = ("status",)
-        cmd = ['git']+[a for a in args]
-        proc = sub.run(cmd, shell=True, text=True, capture_output=True)
+        if len(args)==0:
+            cmd = ['git', "status"]
+        else:
+            cmd = ['git']+[a for a in args]
+        proc = sub.run(" ".join(cmd), shell=True, text=True, capture_output=True)
         await ctx.send(f"```sh\n{proc.stdout}```")
 
 
