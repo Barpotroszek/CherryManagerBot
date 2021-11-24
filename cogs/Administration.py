@@ -106,8 +106,10 @@ class Administration(commands.Cog):
         else:
             cmd = ['git']+[a for a in args]
         proc = sub.run(" ".join(cmd), shell=True, text=True, capture_output=True)
-        await ctx.send(f"```sh\n{proc.stdout}```")
-
+        if proc.returncode == 0:
+            await ctx.send(f"Output:\n```\n{proc.stdout}```")
+        else:
+            await ctx.send(f"Error:\n```\n{proc.stderr}```")
 
 '''
     @commands.command(usage="")
