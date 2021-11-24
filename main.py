@@ -39,6 +39,7 @@ async def on_ready():
     print("\nZalogowano jako:", bot.user)
     print("----------------------------------")
     await startup(bot)
+    await bot.get_user(config.owners_id[0]).send(f"***{bot.user} został uruchomiony***")
     status = cycle(config.activities)
     while not bot.is_closed():
         activity = next(status)
