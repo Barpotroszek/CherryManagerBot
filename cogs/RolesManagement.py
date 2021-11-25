@@ -43,7 +43,7 @@ class RolesManagement(commands.Cog, name="RolesManagement"):
             await ctx.invoke(self.bot.get_command("help"), "role")
 
     @role.command(usage="<role> <user1> <user2>...", help="Przydzielanie roli użytkownikom")
-    async def give(self, ctx, role: discord.Role, users: commands.Greedy[discord.User]):
+    async def give(self, ctx, role: discord.Role, users: commands.Greedy[discord.Member]):
         """Przydzielanie roli podanym użytkownikom"""
         for user in users:
             await user.add_roles(role)

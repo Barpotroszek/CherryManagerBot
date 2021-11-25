@@ -35,7 +35,12 @@ class ErrorsHandler(commands.Cog):
         '''Wyłapuje wszystkie errory wykonane przez wywołane komendy'''
         if type(error) in self.ignored_errors:
             return
-        
+        try:
+            params = error.params
+        except:
+            params=""
+        self.logger.getLogger(error.__class__.__name__).exception(f"{error.args} {params}", exc_info=error)
+
         self.ctx = ctx
         if isinstance(error, errors.CommandNotFound):
             '''Dopasowywanie komend'''
@@ -66,7 +71,7 @@ class ErrorsHandler(commands.Cog):
             await self.reply("Rola nie została znaleziona")
 
         elif isinstance(error, errors.EmojiNotFound):
-            await ctx.message.replu("Emoji nie zostało znalezione")
+            await self.reply("Emoji nie zostało znalezione")
 
         elif isinstance(error, errors.MissingPermissions):
             await self.reply("Nie masz uprawnienia: `{}`".format(error.missing_perms))
@@ -97,7 +102,6 @@ class ErrorsHandler(commands.Cog):
                 params= ""
             _json(self.vars_file).write(dir(error))
             await self.reply("**Wystąpił błąd:** `{}: {}`".format(error.__class__.__name__, error))
-            self.logger.getLogger(error.__class__.__name__).exception(f"{error.args} {params}", exc_info=error)
     
     @commands.Cog.listener()
     async def on_error(self, event, *args, **kwargs):
