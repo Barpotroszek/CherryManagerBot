@@ -147,7 +147,8 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
             "kurw",
             "pierdo",
             "jeb",
-            "spierd"
+            "spierd",
+            "chuj"
         ]
         self.emoji_warning = '⚠️'  # ostrzeżenie
         self.emoji_ban = '🚫'  # ban
