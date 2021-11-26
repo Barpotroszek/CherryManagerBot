@@ -34,7 +34,7 @@ default_channels = { #to_display, in_file
 }
 
 cache = {
-    "messages": {},
+    "messages": {}, "asks_for_roles" : {}
 }
 
 status = _json(CONFIG_FILE_PATH).read()['status']

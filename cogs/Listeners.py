@@ -1,3 +1,4 @@
+import re
 import discord
 from discord import Embed
 from discord.ext import commands
@@ -24,6 +25,14 @@ class RoleOnReaction:
         ''' TYMCZASOWE ROZWIĄZANIE -> na przyjmowanie organizatorów'''
         # role_id = int(role_embd["fields"][1]["value"][3:-1])
 
+        if str(payload.user_id) not in cache["asks_for_roles"]:
+            cache["asks_for_roles"][str(payload.user_id)] = []
+        
+        print(role_id, [a[0] for a in cache["asks_for_roles"][str(payload.user_id)]])
+        if role_id in [a[0] for a in cache["asks_for_roles"][str(payload.user_id)]]:
+            msg = await user.send("Tak jak wspomniałem, twój wniosek o rolę jest rozpatrywany. Musisz cierpliwie poczekać...")
+            return (msg, 0)
+
         link = _json(f"{SERVERS_SETTINGS_FILES}/{payload.guild_id}.json").read()["games"][str(role_id)]['report']
         await payload.member.send(f"Cześć! Twoja prośba została zarejestrowana, teraz musisz czekać na zatwierdzenie roli. Poniżej dodaję formularz zgłoszeniowy do wybranej przez Ciebie gry. Jeśli nie jesteś kapitanem swojego teamu, bądź uzupełniłeś już to zgłoszenie, to możesz pominąć tą wiadomość.\nLink do zgłoszenia:  {link}\n\n W razie problemów pinguj adminów na serwerze 😅")
 
@@ -36,7 +45,9 @@ class RoleOnReaction:
         emb.add_field(name="Nazwa roli:", value=guild.get_role(role_id))
         emb.add_field(name="ID roli:", value=guild.get_role(role_id).id)
         emb.add_field(name="Status:", value="Oczekujące", inline=False)
-        return await role_confirm_channel.send(embed=emb)
+        msg = await role_confirm_channel.send(embed=emb)
+        cache["asks_for_roles"][str(payload.user_id)].append((role_id, msg.id))
+        return (msg, 1)
 
     async def decision_about_role(self, payload, switch):
         guild = self.bot.get_guild(payload.guild_id)
@@ -49,6 +60,9 @@ class RoleOnReaction:
         target = await guild.fetch_member(value)
         # await user.send(info)
 
+        role_id = info['fields'][3]['value']
+        cache["asks_for_roles"][str(payload.user_id)].pop(role_id)
+
         # prośba została zaakceptowana
         if switch:
             await target.send(f"Prośba o rolę *`{info['fields'][2]['value']}`* została zaakceptowana!")
@@ -56,7 +70,6 @@ class RoleOnReaction:
                 info['fields'])-1]['value'] = f"Prośba zaakceptowana przez {user.mention}"
             color = discord.Color.green()
 
-            role_id = info['fields'][3]['value']
             role = guild.get_role(int(role_id))
             # przyznanie roli danemu członkowi
             await target.add_roles(role)
@@ -227,9 +240,10 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
         if payload.emoji.name in self.role_emojis:
             # gdy reakcja została dodana na kanale "role"
             if GuildParams(guild.id).role_channel_id == message.channel.id and payload.emoji.name == self.emoji_raised_hand:
-                msg = await self.ask_for_role(payload)
-                await msg.add_reaction(self.emoji_t)
-                await msg.add_reaction(self.emoji_n)
+                msg, a = await self.ask_for_role(payload)
+                if a:
+                    await msg.add_reaction(self.emoji_t)
+                    await msg.add_reaction(self.emoji_n)
 
             # gdy reakcja została dodana na kanale przeznaczonym do zatwierdzania ról
             elif GuildParams(guild.id).role_confirm_channel_id == message.channel.id:
