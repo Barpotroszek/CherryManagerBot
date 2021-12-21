@@ -13,7 +13,7 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
 
     def remove_from_list(self, guild_id: int, role_id: int):
         '''Usuwa grę z listy i zwraca wszystkie informacje o niej'''
-        data = _json().read(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json")
+        data = _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").read()
         to_give = data["games"][str(guild_id)].pop(str(role_id))
         _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").write(data)
         return to_give
