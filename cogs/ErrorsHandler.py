@@ -6,7 +6,7 @@ from datetime import datetime
 from discord.ext import commands
 from discord.ext.commands import errors
 from config.core import _json, LOGS_DIR_PATH
-from config.config import cache
+from config.config import cache, owners_id
 
 
 class ErrorsHandler(commands.Cog):
@@ -101,7 +101,7 @@ class ErrorsHandler(commands.Cog):
     
     @commands.Cog.listener()
     async def on_error(self, event, *args, **kwargs):
-        owner = commands.Bot.get_user(config.owners_id)
+        owner = commands.Bot.get_user(owners_id[0])
         emb = discord.Embed(title=event)
         emb.add_field("Args:", value=f"`{args}`")
         emb.add_field("Kwargs:", value=f"`{kwargs}`")
