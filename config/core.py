@@ -1,4 +1,4 @@
-import json
+import json_files as json
 from os import makedirs
 from os.path import isfile
 
@@ -59,6 +59,7 @@ async def startup(bot):
         data['role_channel_id'] = None
         data['role_confirm_channel_id'] = None
         data['moderation_channel_id'] = None
+        data['spectator_role_id'] = None
         f.seek(0)
         f.truncate()
         json.dump(data, f, indent=2, ensure_ascii=False)
@@ -72,6 +73,7 @@ class GuildParams:
         guild_config = _json(self.settings_filename).read()
         
         try:
+            self.spectator_role_id = guild_config['spectator_role_id']
             self.role_channel_id = guild_config['role_channel_id']
             self.role_confirm_channel_id = guild_config['role_confirm_channel_id']
             self.moderation_channel_id = guild_config['moderation_channel_id']
@@ -79,8 +81,9 @@ class GuildParams:
             pass
         #self.spectator_role_id = guild_config['spectator_role_id']
 
-    def add_new(self, data):
+    def add_new(self, data, spectator_role_id):
         settings = _json(self.settings_filename).read()
         for a, b in default_channels.items():
             settings[b] = data[a].id
+        settings['spectator_role_id'] = spectator_role_id
         _json(self.settings_filename).write(settings)

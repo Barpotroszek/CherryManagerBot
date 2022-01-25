@@ -1,4 +1,5 @@
 import discord
+from config.core import GuildParams
 from discord.ext import commands
 from discord.ext.commands.errors import RoleNotFound
 
@@ -20,6 +21,21 @@ class RolesManagement(commands.Cog, name="RolesManagement"):
             if member.id == member_id:
                 return member
 
+    @commands.command(usage="<role>", aliases=["rr"])
+    async def reaction_role(self, ctx, role: discord.Role):
+        """Rola na reakcje"""
+        role_chid = GuildParams(ctx.guild.id).role_channel_id
+        role_ch = self.bot.get_channel(role_chid)
+        
+        emb = discord.Embed(
+            title=f"`{role.name}`",
+            description = "Zareaguj pod tą wiadomością, by poprosić o rolę: `{}`".format(role.name),
+            color = role.color
+        )
+        emb.set_footer(text=str(role.id))
+        msg = await role_ch.send(embed=emb)
+        await msg.add_reaction("🖐🏼")
+
     @commands.group(usage="<option>", invoke_without_subcommand=True)
     async def role(self, ctx):
         """Zarządzanie rolami"""
@@ -27,7 +43,7 @@ class RolesManagement(commands.Cog, name="RolesManagement"):
             await ctx.invoke(self.bot.get_command("help"), "role")
 
     @role.command(usage="<role> <user1> <user2>...", help="Przydzielanie roli użytkownikom")
-    async def give(self, ctx, role: discord.Role, users: commands.Greedy[discord.User]):
+    async def give(self, ctx, role: discord.Role, users: commands.Greedy[discord.Member]):
         """Przydzielanie roli podanym użytkownikom"""
         for user in users:
             await user.add_roles(role)

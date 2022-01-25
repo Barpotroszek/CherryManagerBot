@@ -92,7 +92,7 @@ class Administration(commands.Cog):
                 await ctx.send("Dodano role *👀spectator*")
 
 
-            GuildParams(guild.id).add_new(created_channels)
+            GuildParams(guild.id).add_new(created_channels, r_spectator.id)
         text = ",".join([f"`{ch}`" for ch in config.default_channels])
         await ctx.send(f"Made first setup\n **Pamiętaj, by zmienić uprawnienia dla kanałów: {text} !!!!!**")    
 
@@ -101,12 +101,15 @@ class Administration(commands.Cog):
         if ctx.author.id not in config.owners_id:
             await ctx.reply("Tylko właściciel bota może użyć tej komendy")
             return
-        if args == ():
-            args = ("status",)
-        cmd = ['git']+[a for a in args]
-        proc = sub.run(cmd, shell=True, text=True, capture_output=True)
-        await ctx.send(f"```sh\n{proc.stdout}```")
-
+        if len(args)==0:
+            cmd = ['git', "status"]
+        else:
+            cmd = ['git']+[a for a in args]
+        proc = sub.run(" ".join(cmd), shell=True, text=True, capture_output=True)
+        if proc.returncode == 0:
+            await ctx.send(f"Output:\n```\n{proc.stdout}```")
+        else:
+            await ctx.send(f"Error:\n```\n{proc.stderr}```")
 
 '''
     @commands.command(usage="")

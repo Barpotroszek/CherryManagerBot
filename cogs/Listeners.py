@@ -1,8 +1,7 @@
-from email.message import Message
 import discord
 from discord import Embed
 from discord.ext import commands
-from config.core import GuildParams
+from config.core import SERVERS_SETTINGS_FILES, GuildParams, _json
 from config.config import cache, default_channels
 
 class RoleOnReaction:
@@ -19,11 +18,22 @@ class RoleOnReaction:
         role_embd = message.embeds[0].to_dict()
 
         # przyznawanie roli użytkownikom
-        '''role_id = int(role_embd["footer"]['text'])'''
+        role_id = int(role_embd["footer"]['text'])
         # await role_confirm_channel.send(role_embd)   -> aktualnie niepotrzebne
 
         ''' TYMCZASOWE ROZWIĄZANIE -> na przyjmowanie organizatorów'''
-        role_id = int(role_embd["fields"][1]["value"][3:-1])
+        # role_id = int(role_embd["fields"][1]["value"][3:-1])
+
+        if str(payload.user_id) not in cache["asks_for_roles"]:
+            cache["asks_for_roles"][str(payload.user_id)] = []
+        
+        print(role_id, [a[0] for a in cache["asks_for_roles"][str(payload.user_id)]])
+        if role_id in [a[0] for a in cache["asks_for_roles"][str(payload.user_id)]]:
+            msg = await user.send("Tak jak wspomniałem, twój wniosek o rolę jest rozpatrywany. Musisz cierpliwie poczekać...")
+            return (msg, 0)
+
+        link = _json(f"{SERVERS_SETTINGS_FILES}/{payload.guild_id}.json").read()["games"][str(role_id)]['report']
+        await payload.member.send(f"Cześć! Twoja prośba została zarejestrowana, teraz musisz czekać na zatwierdzenie roli. Poniżej dodaję formularz zgłoszeniowy do wybranej przez Ciebie gry. Jeśli nie jesteś kapitanem swojego teamu, bądź uzupełniłeś już to zgłoszenie, to możesz pominąć tą wiadomość.\nLink do zgłoszenia:  {link}\n\n W razie problemów pinguj adminów na serwerze 😅")
 
         emb = Embed(
             title=f"Prośba użytkownika `{user.name}` o zatwierdzenie roli",
@@ -34,7 +44,9 @@ class RoleOnReaction:
         emb.add_field(name="Nazwa roli:", value=guild.get_role(role_id))
         emb.add_field(name="ID roli:", value=guild.get_role(role_id).id)
         emb.add_field(name="Status:", value="Oczekujące", inline=False)
-        return await role_confirm_channel.send(embed=emb)
+        msg = await role_confirm_channel.send(embed=emb)
+        cache["asks_for_roles"][str(payload.user_id)].append((role_id, msg.id))
+        return (msg, 1)
 
     async def decision_about_role(self, payload, switch):
         guild = self.bot.get_guild(payload.guild_id)
@@ -47,6 +59,9 @@ class RoleOnReaction:
         target = await guild.fetch_member(value)
         # await user.send(info)
 
+        role_id = info['fields'][3]['value']
+        cache["asks_for_roles"][str(payload.user_id)].pop(role_id)
+
         # prośba została zaakceptowana
         if switch:
             await target.send(f"Prośba o rolę *`{info['fields'][2]['value']}`* została zaakceptowana!")
@@ -54,8 +69,7 @@ class RoleOnReaction:
                 info['fields'])-1]['value'] = f"Prośba zaakceptowana przez {user.mention}"
             color = discord.Color.green()
 
-            role = guild.get_role(int(info['fields'][3]['value']))
-
+            role = guild.get_role(int(role_id))
             # przyznanie roli danemu członkowi
             await target.add_roles(role)
 
@@ -94,6 +108,13 @@ class Moderation:
             msg.guild.id).moderation_channel_id
         moderation_channel = msg.guild.get_channel(moderation_channel_id)
 
+
+        data = _json(f"{SERVERS_SETTINGS_FILES}/{msg.guild.id}").read()
+        if str(msg.author.id) not in data["warnings"]:
+            warings_amount = 0
+        else:
+            warings_amount = data["warnings"][str(msg.author.id)]
+
         emb = discord.Embed(
             title="`Alert moderatorski` (xd)",
             # colour=0x8b0000,
@@ -106,18 +127,18 @@ class Moderation:
         emb.add_field(name="Data wysłania:",
                       value=msg.created_at.strftime("%H:%M %d/%m/%Y"))
         emb.add_field(name="Treść:", value=msg.content, inline=False)
-
+        emb.add_field(name="Liczba poprzednich ostrzeżeń:", value=warings_amount)
         emb.add_field(name="Status:", value="Do rozpatrzenia")
         emb.add_field(name="Wybierz jedną z opcji działania:",
                       value=f"""{self.emoji_warning} -> wysłanie ostrzeżenia do użytkownika\n
-                        {self.emoji_ban} -> nakładanie bana na użytkownika""")
-
+                        {self.emoji_ban} -> nakładanie bana na użytkownika(nie działa 😅)""")
         msg = await moderation_channel.send(embed=emb)
         await msg.add_reaction(self.emoji_warning)
         await msg.add_reaction(self.emoji_ban)
 
     async def send_warning(self, payload):
         '''Wysyłanie ostrzeżenia do użytkownika'''
+        file_path = f"{SERVERS_SETTINGS_FILES}/{payload.guild_id}.json"
         guild = self.bot.get_guild(payload.guild_id)
         channel = guild.get_channel(payload.channel_id)
         msg = await channel.fetch_message(payload.message_id)
@@ -126,6 +147,14 @@ class Moderation:
         value = int(info["fields"][1]["value"])
         link = info['fields'][3]["value"]
         target = await guild.fetch_member(value)
+
+        '''Zwiększ liczbę warnów o 1'''
+        data = _json(file_path).read()
+        user_id = str(payload.user_id)
+        if user_id not in data["warnings"]:
+            data["warnings"][user_id] = 0
+        data["warnings"][user_id] += 1
+        _json(file_path).write(data)
 
         await target.send(
         f"""Joł, mordeczko, w sprawie tej wiadomości:\n {link}
@@ -148,7 +177,8 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
             "kurw",
             "pierdo",
             "jeb",
-            "spierd"
+            "spierd",
+            "chuj"
         ]
         self.emoji_warning = '⚠️'  # ostrzeżenie
         self.emoji_ban = '🚫'  # ban
@@ -210,9 +240,10 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
         if payload.emoji.name in self.role_emojis:
             # gdy reakcja została dodana na kanale "role"
             if GuildParams(guild.id).role_channel_id == message.channel.id and payload.emoji.name == self.emoji_raised_hand:
-                msg = await self.ask_for_role(payload)
-                await msg.add_reaction(self.emoji_t)
-                await msg.add_reaction(self.emoji_n)
+                msg, a = await self.ask_for_role(payload)
+                if a:
+                    await msg.add_reaction(self.emoji_t)
+                    await msg.add_reaction(self.emoji_n)
 
             # gdy reakcja została dodana na kanale przeznaczonym do zatwierdzania ról
             elif GuildParams(guild.id).role_confirm_channel_id == message.channel.id:
@@ -234,6 +265,13 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
             print("Użytkownik dodany do listy")
             await user.send("Pamiętaj, że jestem tylko botem. Prawdopodobnie ta wiadomość zostanie przekazana do admistracji :innocent:")
 
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        print(f"{member} dołączył do {member.guild}")
+        await member.send(f"Cześć! Witamy na serwerze `{member.guild}`")
+        spectator_role_id = GuildParams(member.guild.id).spectator_role_id
+        spectator_role = member.guild.get_role(spectator_role_id)
+        await member.add_roles(spectator_role)
 
 def setup(bot):
     bot.add_cog(Listeners(bot))

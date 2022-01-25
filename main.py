@@ -9,7 +9,8 @@ from config import config
 
 bot = commands.Bot(
     config.commands_prefix,
-    help_command=None
+    help_command=None,
+    intents=discord.Intents.all()
 )
 
 # funkcja testowa
@@ -27,8 +28,9 @@ async def on_connect():
             bot.load_extension(cog)
         except NoEntryPointError:
             print(f"Nie udało się załadować roszczerzenia {cog}")
-        except ModuleNotFoundError:
-            print(cog)
+        except Exception as e:
+            print(f"{cog} -> {e}")
+            pass 
     print("Dane wczytane")
 
 
@@ -37,6 +39,7 @@ async def on_ready():
     print("\nZalogowano jako:", bot.user)
     print("----------------------------------")
     await startup(bot)
+    await bot.get_user(config.owners_id[0]).send(f"***{bot.user} został uruchomiony***")
     status = cycle(config.activities)
     while not bot.is_closed():
         activity = next(status)

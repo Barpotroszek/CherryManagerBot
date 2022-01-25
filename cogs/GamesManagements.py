@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 from discord.ext.commands.context import Context
-from config.core import GuildParams, _json
+from config.core import SERVERS_SETTINGS_FILES, GuildParams, _json, SERVERS_SETTINGS_FILES
 
 
 class GamesManagement(commands.Cog, name="GamesManagement", ):
@@ -9,14 +9,13 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
 
     def __init__(self, bot):
         self.bot = bot
-        self.keys = ['kolor', 'opis', 'guards', 'rules']
-        self.file_path = "cogs/games/GamesDescriptions.json"
+        self.keys = ['kolor', 'opis', 'guards', 'report']
 
     def remove_from_list(self, guild_id: int, role_id: int):
         '''Usuwa grę z listy i zwraca wszystkie informacje o niej'''
-        data = _json(self.file_path).read()
-        to_give = data[str(guild_id)].pop(str(role_id))
-        _json(self.file_path).write(data)
+        data = _json().read(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json")
+        to_give = data["games"][str(guild_id)].pop(str(role_id))
+        _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").write(data)
         return to_give
 
     def get_role(self, guild, name):
@@ -44,7 +43,7 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
 
         embed.add_field(name="Opis", value=game_info['opis'], inline=False)
         embed.add_field(name="Odpowiedzialni", value=guards, inline=False)
-        embed.add_field(name="Regulamin", value=game_info['rules'], inline=False)
+        embed.add_field(name="Zgłoszenia", value=game_info['report'], inline=False)
         embed.set_footer(text=str(role.id))
         return embed
 
@@ -60,21 +59,18 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
         await ctx.invoke(self.bot.get_command("help"), "game")
 
     @game.command(name="add", usage = "add <name> <color_in_hex>", help="Dodawanie nowej gry")
-    async def add(self, ctx, role_name, color: str, opis=None, rules=None):
+    async def add(self, ctx, role_name, color: str, opis=None, report=None):
         """Dodawanie nowej gry:
             <role_name> -> nazwa danej gry i roli
             <kolor> -> kolor danej gry i roli
             <opis> -> opis gry
             <guards> -> odpowiedzialni za daną strefę
-            <rules> -> regulamin
+            <report> -> link do zgłoszeń
         """
 
-        async with ctx.typing():    
-            data = _json(self.file_path).read()
+        async with ctx.typing():
             guild_id = str(ctx.guild.id)
-            if guild_id not in data:
-                print("\n\n\nno data")
-                data[guild_id] = {}
+            data = _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").read()
 
             try:
                 role_ch = ctx.guild.get_channel(
@@ -84,12 +80,12 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
             except:
                 return await ctx.send("Najpierw użyj komendy `!beginning`")
 
-            if role_name in data[guild_id]:
+            if role_name in data["games"]:
                 try:
                     role = await commands.RoleConverter().convert(ctx, role_name)
                     return await ctx.send("Rola: " + role.mention + " została już utworzona")
                 except:
-                    data[guild_id].pop(role_name)
+                    data["games"].pop(role_name)
 
 
             guild = ctx.guild
@@ -169,7 +165,7 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
                 "guard_role_id": guard_role.id,
                 "kolor": color,
                 "opis": opis,
-                "rules": rules,
+                "report": report,
                 "channels": ch_id
             }
 
@@ -178,7 +174,7 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
             game_info['msg_id'] = msg.id
             
             data[guild_id][role.id] = game_info
-            _json(self.file_path).write(data)
+            _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").write(data)
         await ctx.send("***Zrobione!***")
 
     @game.group(invoke_without_command = True)
@@ -192,8 +188,9 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
                 await msg.add_reaction("🖐🏼")
                 #await ctx.send(msg)
             
-            data = _json(self.file_path).read()
-            info = data[str(ctx.guild.id)]
+            data = _json(f"{SERVERS_SETTINGS_FILES}/{ctx.guild.id}.json").read()
+            print("Data: \n", data)
+            info = data["games"]
             for id in info:
                 print(id, info[id])
                 role = ctx.guild.get_role(int(id))
@@ -208,12 +205,9 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
     async def color(self, ctx, role: discord.Role, value: str):
         """Aktualizowanie koloru danej roli i gry"""
         async with ctx.typing():
-            data = _json(self.file_path).read()
             guild_id = str(ctx.guild.id)
-
-            if guild_id not in data:
-                data[guild_id] = {}
-            game_info = data[guild_id][str(role.id)]
+            data = _json(f"{SERVERS_SETTINGS_FILES}/{ctx.guild.id}.json").read()
+            game_info = data["games"][str(role.id)]
 
             
             # tworzenie koloru
@@ -236,18 +230,16 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
             await message.edit(embed=self.create_embed(ctx, role, game_info))
 
             data[guild_id][role.id] = game_info
-            _json(self.file_path).write(data)
+            _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").write(data)
 
         await ctx.send(f"Rola: ***" + role.mention + "*** została zaktualizowana")
 
     @update.command(usage="<role> <opis>", help="Aktualizowanie opisu danej gry")
     async def desc(self, ctx, role: discord.Role, opis: str):
         async with ctx.typing():
-            data = _json(self.file_path).read()
             guild_id = str(ctx.guild.id)
-            if guild_id not in data:
-                data[guild_id] = {}
-            game_info = data[guild_id][str(role.id)]
+            data = _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").read()
+            game_info = data["games"][str(role.id)]
             game_info['opis'] = opis
 
             # pobieranie ustawionego kanału na role
@@ -256,25 +248,23 @@ class GamesManagement(commands.Cog, name="GamesManagement", ):
             await message.edit(embed=self.create_embed(ctx, role, game_info))
 
             data[guild_id][role.id] = game_info
-            _json(self.file_path).write(data)
+            _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").write(data)
         await ctx.send("*Opis został zaktualizowany :D*")
 
     @update.command(usage="<role>", help="*No aktualnie nie działa jak powinno* :sweat_smile:")
     async def guards(self, ctx, role: discord.Role):
         async with ctx.typing():
-            data = _json(self.file_path).read()
             guild_id = str(ctx.guild.id)
+            data = _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").read()
             await ctx.send("Praca w toku")
-            if guild_id not in data:
-                data[guild_id] = {}
-            game_info = data[guild_id][str(role.id)]
+            game_info = data["games"][str(role.id)]
 
             # pobieranie ustawionego kanału na role
             rid = GuildParams(ctx.guild.id).role_channel_id
             message = await self.bot.get_channel(rid).fetch_message(game_info['msg_id'])
             await message.edit(embed=self.create_embed(ctx, role, game_info))
-            data[guild_id][str(role.id)] = game_info
-            _json(self.file_path).write(data)
+            data["games"][str(role.id)] = game_info
+            _json(f"{SERVERS_SETTINGS_FILES}/{guild_id}.json").write(data)
 
         await ctx.send(f"Odpowiedzialni do {role.mention} zostali zaktualizowani")
 
