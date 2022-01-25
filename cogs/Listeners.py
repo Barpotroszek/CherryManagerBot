@@ -1,3 +1,4 @@
+from email.message import Message
 import discord
 from discord import Embed
 from discord.ext import commands
@@ -159,10 +160,11 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
         self.role_emojis = [self.emoji_n, self.emoji_t, self.emoji_raised_hand]
 
     @commands.Cog.listener(name="on_message")
-    async def catch_prohibited_words(self, msg):
+    async def catch_prohibited_words(self, msg: Message):
         if msg.author.id == self.bot.user.id or type(msg.channel) != discord.TextChannel:
             print("Returned")
             return
+        print(f"Author: {msg.author.name}")
         print(msg.content)
 
         '''  MODERACJA  '''
