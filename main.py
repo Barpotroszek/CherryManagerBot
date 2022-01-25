@@ -30,7 +30,6 @@ async def on_connect():
             print(f"Nie udało się załadować roszczerzenia {cog}")
         except Exception as e:
             print(f"{cog} -> {e}")
-            pass 
     print("Dane wczytane")
 
 

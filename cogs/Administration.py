@@ -61,7 +61,6 @@ class Administration(commands.Cog):
                 await channel.set_permissions(target=everyone, read_messages=True, send_messages=True)
             except Exception as e:
                 await ctx.send(e)
-                pass
             
             created_channels={}
             # poszukiwanie/tworzenie kanałów wymienionych powyżej
