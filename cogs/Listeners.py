@@ -201,7 +201,7 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
         if msg.embeds != [] and "Barpotroszek/CherryManagerBot" in msg.embeds[0].url:
                 run(["git", "pull", "origin", "master"])
                 ctx:commands.Context = await self.bot.get_context(msg)
-                ctx.invoke(self.bot.get_command("reload"))
+                await ctx.invoke(self.bot.get_command("reload"))
 
         '''  MODERACJA  '''
         # jeżeli wyłapano "Zakazane słowa"
