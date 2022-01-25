@@ -197,7 +197,6 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
         if msg.author.id == self.bot.user.id or type(msg.channel) != discord.TextChannel:
             print("Returned")
             return
-        print(f"Author: {msg.author.name}")
         if msg.embeds != [] and "Barpotroszek/CherryManagerBot" in msg.embeds[0].url:
                 run(["git", "pull", "origin", "master"])
                 ctx:commands.Context = await self.bot.get_context(msg)
