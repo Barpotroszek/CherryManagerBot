@@ -1,8 +1,11 @@
+from distutils import command
+from email.message import Message
 import discord
-from discord import Embed
+from discord import Embed, Message
 from discord.ext import commands
 from config.core import SERVERS_SETTINGS_FILES, GuildParams, _json
 from config.config import cache, default_channels
+from subprocess import run
 
 class RoleOnReaction:
     async def ask_for_role(self, payload):
@@ -195,7 +198,10 @@ class Listeners(commands.Cog, RoleOnReaction, Moderation):
             print("Returned")
             return
         print(f"Author: {msg.author.name}")
-        print(msg.content)
+        if msg.embeds != [] and "Barpotroszek/CherryManagerBot" in msg.embeds[0].url:
+                run(["git", "pull", "origin", "master"])
+                ctx:commands.Context = await self.bot.get_context(msg)
+                ctx.invoke(self.bot.get_command("reload"))
 
         '''  MODERACJA  '''
         # jeżeli wyłapano "Zakazane słowa"
